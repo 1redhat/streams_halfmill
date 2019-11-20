@@ -1,0 +1,74 @@
+= streams_halfmill
+
+Tesing 1/2 million records on streams by constraining CPUs
+* Uses 3 kafka nodes
+* Uses 3 replicas
+* Uses 40 partitions
+* based on streams 1.3/7.5
+
+
+== Install cluster operator
+
+After logging into openshift via the cli create a new project
+----
+oc new-project kafka
+----
+
+Create the cluster operator in the kafka project/namespace
+----
+oc apply -f install/cluster-operator -n kafka
+oc apply -f examples/templates/cluster-operator -n kafka
+----
+
+== Install and configure kafka cluster
+
+Create the kafka cluster in the name space
+----
+oc apply -f examples/kafka/kafka-persistent.yaml
+----
+
+Create a topic (make sure the 3 zookeeper and 3 kafka pods are started)
+----
+oc apply -f examples/topic/kafka-topic.yaml
+----
+
+== Running within container
+
+Download your service account from https://access.redhat.com/terms-based-registry/ as an OpenShift secret and reference it below.  Note certain values below must be changed to me your environment
+----
+oc create -f my-service-account-pull-secret.yaml
+oc secrets link builder my-service-account-pull-secret
+oc new-app --name perf-client https://github.com/rediverson/streams-perf.git
+oc get pods
+oc rsh perf-client-1-t7tn7
+cd /tmp/home/streams-perf/client/bin
+----
+
+=== Modify Configuration
+Modify the `consumer.properties` and `producer.properties` to meet your environment configuration
+Use the fully qualified service addresses within openshift. Example below:
+----
+bootstrap.servers=https://my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
+----
+Remove all ssl settings
+
+=== Execute the producer performance test
+
+Note: You must have kafka installed locally and its `bin` directory is included in the `PATH` environment variable
+
+----
+./kafka-producer-perf-test.sh --producer.config producer.properties --throughput -1 --num-records 500000 --record-size 650000 --topic my-topic
+./kafka-consumer-perf-test.sh --consumer.config consumer.properties --topic my-topic --group my-group --messages 150000 --timeout 9999999999 --threads 20 --broker-list=https://my-cluster-kafka-0-kafka.apps.cluster-e6db.sandbox239.opentlc.com:443,https://my-cluster-kafka-1-kafka.apps.cluster-e6db.sandbox239.opentlc.com:443,https://my-cluster-kafka-2-kafka.apps.cluster-e6db.sandbox239.opentlc.com:443
+
+----
+
+== Delete topics and clusters
+Delete topic, user and cluster with sample below
+----
+oc delete kafkauser my-user
+oc delete kafkatopic my-topic
+oc delete kafka my-cluster
+----
+
+
+
