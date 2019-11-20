@@ -1,3 +1,6 @@
 priv.txt
 secret.yaml
 .DS_Store
+
+### Maven ###
+*/target/**
