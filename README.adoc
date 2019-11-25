@@ -1,12 +1,12 @@
 = streams_halfmill
 
-Tesing 1/2 million records on streams by constraining CPUs and memory 
+Tesing 1/2 million records on streams by constraining CPUs and memory.  Records are sized at 650000 bytes. 
 
 * Installation based on streams 1.3/7.5. See product https://access.redhat.com/documentation/en-us/red_hat_amq/7.5/html/using_amq_streams_on_openshift/index[documentation] for more detail  
 * Uses 3 kafka nodes
 * Uses 3 replicas
 * Uses 40 partitions
-* Uses 2 cpus and 4Gi of memory
+* Uses 2 cpus and 4Gi of memory.  See broker https://github.com/rediverson/streams_halfmill/blob/master/examples/kafka/kafka-persistent.yaml[config] for more details.
 
 
 == Install cluster operator
