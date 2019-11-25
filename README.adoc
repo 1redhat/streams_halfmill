@@ -1,13 +1,19 @@
 = streams_halfmill
 
-Tesing 1/2 million records on streams by constraining CPUs
+Tesing 1/2 million records on streams by constraining CPUs and memory 
+
+* Installation based on streams 1.3/7.5. See product https://access.redhat.com/documentation/en-us/red_hat_amq/7.5/html/using_amq_streams_on_openshift/index[documentation] for more detail  
 * Uses 3 kafka nodes
 * Uses 3 replicas
 * Uses 40 partitions
-* based on streams 1.3/7.5
+* Uses 2 cpus and 4Gi of memory
 
 
 == Install cluster operator
+
+Review the installation https://access.redhat.com/documentation/en-us/red_hat_amq/7.5/html/using_amq_streams_on_openshift/getting-started-str#downloads-str[instructions] first.
+
+IMPORTANT: Installation requires a user with cluster admin priviledges
 
 After logging into openshift via the cli create a new project
 ----
@@ -45,7 +51,7 @@ cd /tmp/home/streams-perf/client/bin
 ----
 
 === Modify Configuration
-Modify the `consumer.properties` and `producer.properties` to meet your environment configuration
+Modify the `producer.properties` to meet your environment configuration
 Use the fully qualified service addresses within openshift. Example below:
 ----
 bootstrap.servers=https://my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
@@ -58,7 +64,6 @@ Note: You must have kafka installed locally and its `bin` directory is included 
 
 ----
 ./kafka-producer-perf-test.sh --producer.config producer.properties --throughput -1 --num-records 500000 --record-size 650000 --topic my-topic
-./kafka-consumer-perf-test.sh --consumer.config consumer.properties --topic my-topic --group my-group --messages 150000 --timeout 9999999999 --threads 20 --broker-list=https://my-cluster-kafka-0-kafka.apps.cluster-e6db.sandbox239.opentlc.com:443,https://my-cluster-kafka-1-kafka.apps.cluster-e6db.sandbox239.opentlc.com:443,https://my-cluster-kafka-2-kafka.apps.cluster-e6db.sandbox239.opentlc.com:443
 
 ----
 
